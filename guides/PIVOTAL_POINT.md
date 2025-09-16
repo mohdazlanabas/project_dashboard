@@ -49,7 +49,7 @@ This document records the current stable, working state of the ISWMC Dashboard s
   - `templates/dashboard/_aggregated_table.html`
     - Embeds aggregated data JSON in `#agg-data`
     - Three chart sections (Weight, Composition, Lorry Type)
-    - AI section moved here: “Ask Mamu, Your AI Secret Agent” with example buttons + backend indicator
+    - AI section moved here: “Ask SA'ID, Your AI Secret Agent” with example buttons + backend indicator
     - Transaction table with blue banding and formatted numbers
 
 - Static assets (development)

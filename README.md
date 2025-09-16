@@ -13,7 +13,7 @@ This project is an AI-powered dashboard for an Integrated Solid Waste Management
 - Transaction view table with thousands separators and alternating period banding
 - Robust timestamp parser for `DELIVERY_TIME` (supports datetime objects, dict `$date`, epoch, multiple string formats)
 - REST API (DRF): lorries, transactions (with computed `lorry_types_id`), and aggregated data
-- AI assistant: “Ask Mamu, Your AI Secret Agent”
+- AI assistant: “Ask SA'ID, Your AI Secret Agent”
   - Local NLQ tools: list/describe collections, totals by period, tables by day/week/month, by lorry type, delivery counts
   - Example question buttons + backend indicator (Local NLQ or Gemini)
   - Vertex AI Gemini scaffold with safe function-calling to local tools (optional)

@@ -212,7 +212,7 @@
         if (compCanvas) {
             const cctx = compCanvas.getContext('2d');
             if (window.compChartInstance) window.compChartInstance.destroy();
-            const compLabels = ['Leachate (9%)', 'Recyclecables (11%)', 'Organic (45%)', 'Inorganic (20%)', 'Others (15%)'];
+            const compLabels = ['Leachate (9%)', "Recycables (11%)", 'Organic (45%)', 'Inorganic (20%)', 'Others (15%)'];
             const compPerc = [0.09, 0.11, 0.45, 0.20, 0.15];
             const compValues = compPerc.map(p => Math.round(p * totalWeight));
             window.compChartInstance = new Chart(cctx, {

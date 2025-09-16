@@ -23,6 +23,43 @@
     <!-- Uses the same #agg-data JSON; second chart renders from it -->
     
 </div>
+
+<!-- AI Assistant block moved here -->
+<div class="mt-6">
+    <h2 class="text-lg font-semibold mb-2">Ask Mamu, Your AI Secret Agent</h2>
+    <form id="chat-form" hx-post="{% url 'dashboard_chat' %}" hx-target="#chat-response" hx-swap="innerHTML" class="flex gap-2 mb-2">
+        <input type="text" name="question" placeholder="Ask a question about the data..." required class="flex-1 border rounded px-2 py-1" />
+        <button type="submit" class="bg-blue-600 text-white px-4 py-1 rounded">Ask</button>
+    </form>
+    <div class="flex flex-wrap gap-2 mb-2">
+        <button class="text-xs border rounded px-2 py-1 hover:bg-gray-50"
+                hx-post="{% url 'dashboard_chat' %}"
+                hx-target="#chat-response" hx-swap="innerHTML"
+                hx-vals='{"question":"List collections"}'>List collections</button>
+        <button class="text-xs border rounded px-2 py-1 hover:bg-gray-50"
+                hx-post="{% url 'dashboard_chat' %}"
+                hx-target="#chat-response" hx-swap="innerHTML"
+                hx-vals='{"question":"Describe deliveries"}'>Describe deliveries</button>
+        <button class="text-xs border rounded px-2 py-1 hover:bg-gray-50"
+                hx-post="{% url 'dashboard_chat' %}"
+                hx-target="#chat-response" hx-swap="innerHTML"
+                hx-vals='{"question":"Totals monthly"}'>Totals monthly</button>
+        <button class="text-xs border rounded px-2 py-1 hover:bg-gray-50"
+                hx-post="{% url 'dashboard_chat' %}"
+                hx-target="#chat-response" hx-swap="innerHTML"
+                hx-vals='{"question":"By lorry type weekly"}'>By lorry type weekly</button>
+        <button class="text-xs border rounded px-2 py-1 hover:bg-gray-50"
+                hx-post="{% url 'dashboard_chat' %}"
+                hx-target="#chat-response" hx-swap="innerHTML"
+                hx-vals='{"question":"Daily breakdown"}'>Daily breakdown</button>
+        <button class="text-xs border rounded px-2 py-1 hover:bg-gray-50"
+                hx-post="{% url 'dashboard_chat' %}"
+                hx-target="#chat-response" hx-swap="innerHTML"
+                hx-vals='{"question":"How many deliveries weekly"}'>Deliveries weekly</button>
+    </div>
+    <div class="text-xs text-gray-500 mb-2">AI backend: {{ ai_backend }}</div>
+    <div id="chat-response" class="bg-gray-100 rounded p-3 min-h-[2em]"></div>
+</div>
 <h3 class="text-sm font-semibold text-gray-600 tracking-wide mb-2">TRANSACTION VIEW</h3>
 <table class="min-w-full border border-gray-200 rounded-lg overflow-hidden">
     <thead class="bg-gray-100">

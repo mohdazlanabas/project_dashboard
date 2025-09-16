@@ -13,7 +13,10 @@ This project is an AI-powered dashboard for an Integrated Solid Waste Management
 - Transaction view table with thousands separators and alternating period banding
 - Robust timestamp parser for `DELIVERY_TIME` (supports datetime objects, dict `$date`, epoch, multiple string formats)
 - REST API (DRF): lorries, transactions (with computed `lorry_types_id`), and aggregated data
-- Simple AI chat box (Gemini placeholder; ready for Vertex AI wiring)
+- AI assistant: “Ask Mamu, Your AI Secret Agent”
+  - Local NLQ tools: list/describe collections, totals by period, tables by day/week/month, by lorry type, delivery counts
+  - Example question buttons + backend indicator (Local NLQ or Gemini)
+  - Vertex AI Gemini scaffold with safe function-calling to local tools (optional)
 
 ## Tech Stack
 
@@ -51,6 +54,17 @@ This project is an AI-powered dashboard for an Integrated Solid Waste Management
   - `http://127.0.0.1:8000/static/mbsp.png`
   - `http://127.0.0.1:8000/static/gssb.png`
 
+### AI Assistant
+
+- Local NLQ (default): no cloud required. Supported intents:
+  - “List collections”, “Describe deliveries”, “Totals monthly/daily/weekly/hourly”
+  - “By lorry type weekly/daily…”, “Daily breakdown”, “How many deliveries weekly”
+- Vertex AI (optional): set environment and restart server
+  - `GOOGLE_CLOUD_PROJECT=<project>`
+  - `GEMINI_LOCATION=us-central1` (or region)
+  - `GOOGLE_APPLICATION_CREDENTIALS=/absolute/path/to/service_account.json`
+  - The assistant auto-detects Gemini and displays “AI backend: Gemini”.
+
 ## Data Assumptions & Trial Window
 
 - The dashboard reads from existing Atlas collections:
@@ -63,6 +77,10 @@ This project is an AI-powered dashboard for an Integrated Solid Waste Management
 - A fixed "today" of 2025-01-25 16:00 UTC is used for MVP:
   - Hourly view: shows 2025-01-25 00:00 → 16:00 only
   - Daily/Weekly/Monthly: month-to-date (Jan 1 → Jan 25, capped at Jan 31)
+
+## Layout Notes
+
+- The Date & Time card and Logos panel track the right edge of the dashboard card so they remain visually adjacent on narrower screens.
 
 ## Endpoints
 

@@ -95,3 +95,18 @@ The foundation is solid, and we are ready to build the interactive and AI-powere
 - Migrations for Django admin/auth are not applied; not needed for dashboard, but required if admin is used.
 - Composition chart uses fixed proportions; consider wiring to real composition data when available.
 - Consider caching lookups for `lorry_types_id` for larger datasets.
+
+## Phase 7: NLQ assistant + Gemini scaffold + layout alignment (2025-09-16)
+
+- Added local NLQ layer (`dashboard/nlq.py`) with tools in `dashboard/ai_tools.py` for:
+  collections listing/description, totals by period, by-period tables, and by‑type aggregations.
+- Chat uses `ask_gemini()` which prefers Vertex AI Gemini (if env set) with function-calling; otherwise it falls back to NLQ.
+- “Ask Mamu, Your AI Secret Agent” UI moved to aggregated section; example buttons added; backend indicator shows Local NLQ or Gemini.
+- Chat endpoint now renders AI HTML directly (question escaped only), removing visible raw tags.
+- Composition chart compacted; banding color strengthened.
+- Date/Time and Logo cards now align to the dashboard card using small JS (`positionSideCards()`), keeping them beside the dashboard on smaller screens.
+
+### Pivotal Point 2
+
+- Tag suggestion: `pivotal-2-2025-09-16`.
+- Refer to `guides/PIVOTAL_POINT.md` for the inventory and restore steps.

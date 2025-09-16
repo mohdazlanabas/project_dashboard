@@ -23,6 +23,11 @@ TRIAL_START = timezone.make_aware(datetime(2025, 1, 1, 0, 0, 0), timezone.utc)
 TRIAL_END = timezone.make_aware(datetime(2025, 1, 31, 23, 59, 59), timezone.utc)
 # Fixed "today" for MVP scenarios; adjust in production
 NOW = timezone.make_aware(datetime(2025, 1, 25, 16, 0, 0), timezone.utc)
+try:
+    from .gemini import _vertex_available as _ai_vertex_available
+except Exception:
+    def _ai_vertex_available():
+        return False
 
 def get_window(period: str):
     """Return (since, until) bounds based on the selected period.
@@ -211,6 +216,7 @@ def dashboard_view(request):
         'period': period,
         'now': NOW,
         'now_display': NOW.strftime('%d %b %Y, %I:%M %p UTC'),
+        'ai_backend': 'Gemini' if _ai_vertex_available() else 'Local NLQ',
         # Summary KPIs for the trial month
         'kpi_total_deliveries': total_deliveries,
         'kpi_total_weight_kg': total_weight_kg,
@@ -272,6 +278,10 @@ def dashboard_chat(request):
             from .gemini import ask_gemini
             answer = ask_gemini(question)
         except Exception as e:
-            answer = f"[Error contacting AI: {escape(str(e))}]"
-        return HttpResponse(f'<strong>Q:</strong> {escape(question)}<br><strong>A:</strong> {escape(answer)}')
+            answer = f"<span class=\"text-red-600\">[Error contacting AI: {escape(str(e))}]</span>"
+        # Render NLQ/AI HTML as-is; question stays escaped
+        return HttpResponse(
+            f'<div><strong>Q:</strong> {escape(question)}</div>'
+            f'<div><strong>A:</strong> {answer}</div>'
+        )
     return HttpResponse('<span class="text-red-600">Invalid request.</span>')

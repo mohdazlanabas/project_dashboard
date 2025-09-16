@@ -9,13 +9,13 @@
 </head>
 <body class="bg-gray-50 min-h-screen p-6">
     <!-- Fixed Date & Time card at top-right of page -->
-    <div class="fixed top-4 right-6 z-10 bg-white/90 backdrop-blur rounded-lg border p-3 shadow">
+    <div id="dt-card" class="fixed top-4 z-10 bg-white/90 backdrop-blur rounded-lg border p-3 shadow">
         <div class="text-xs text-gray-600">Date & Time</div>
         <div class="text-base font-semibold">{{ now|date:"j M Y, g:i A" }} UTC</div>
     </div>
 
     <!-- Logos card (vertical) below the date/time card -->
-    <div class="fixed right-6 z-10 bg-white/90 backdrop-blur rounded-lg border p-3 shadow mt-2" style="top: 88px; width: 160px; display: flex; flex-direction: column; align-items: center; gap: 12px;">
+    <div id="logo-card" class="fixed z-10 bg-white/90 backdrop-blur rounded-lg border p-3 shadow mt-2" style="top: 88px; width: 160px; display: flex; flex-direction: column; align-items: center; gap: 12px;">
         <div style="display:flex; flex-direction:column; align-items:center;">
             <img
                     src="{% static 'mbsp.png' %}"
@@ -35,7 +35,7 @@
         </div>
     </div>
 
-    <div class="max-w-4xl mx-auto bg-white rounded-lg shadow p-6">
+    <div id="main-wrap" class="max-w-4xl mx-auto bg-white rounded-lg shadow p-6">
         <div class="mb-4">
             <h1 class="text-2xl font-bold">ISWMC Dashboard</h1>
         </div>
@@ -106,14 +106,7 @@
                 </tbody>
             </table>
         </div>
-        <div class="mt-8">
-            <h2 class="text-lg font-semibold mb-2">Ask the AI Assistant</h2>
-            <form id="chat-form" hx-post="{% url 'dashboard_chat' %}" hx-target="#chat-response" hx-swap="innerHTML" class="flex gap-2 mb-2">
-                <input type="text" name="question" placeholder="Ask a question about the data..." required class="flex-1 border rounded px-2 py-1" />
-                <button type="submit" class="bg-blue-600 text-white px-4 py-1 rounded">Ask</button>
-            </form>
-            <div id="chat-response" class="bg-gray-100 rounded p-3 min-h-[2em]"></div>
-        </div>
+        
     </div>
     <footer class="max-w-4xl mx-auto mt-4 text-center text-sm text-gray-500">
         Developed by Net1io.com
@@ -292,5 +285,24 @@
         var tgt = (e.detail && e.detail.target) ? e.detail.target : e.target;
         if (tgt && tgt.id === 'agg-table') renderAggChart();
     });
+
+    // Position side cards (Date/Time and Logos) next to the dashboard container
+    function positionSideCards() {
+        var main = document.getElementById('main-wrap');
+        var dt = document.getElementById('dt-card');
+        var lg = document.getElementById('logo-card');
+        if (!main || !dt || !lg) return;
+        var rect = main.getBoundingClientRect();
+        var left = Math.round(rect.right + 16); // 16px gap from the dashboard card
+        var maxLeft = window.innerWidth - 176; // 160px card + ~16px margin
+        if (left > maxLeft) left = maxLeft;
+        dt.style.left = left + 'px';
+        dt.style.right = 'auto';
+        lg.style.left = left + 'px';
+        lg.style.right = 'auto';
+    }
+    window.addEventListener('resize', positionSideCards);
+    document.addEventListener('DOMContentLoaded', positionSideCards);
+    document.body.addEventListener('htmx:afterSettle', positionSideCards);
     </script>
 </html>

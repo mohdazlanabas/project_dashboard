@@ -123,3 +123,91 @@ This project is an AI-powered dashboard for an Integrated Solid Waste Management
 - The charts are rendered from data embedded in the partial as JSON (`#agg-data`) and drawn in the base page after HTMX swaps (`htmx:afterSwap/afterSettle`).
 - To avoid landing on the partial URL after period change, responses set `HX-Push-Url` to the root with `?period=...`.
 - Transaction API returns a computed `lorry_types_id` to avoid Djongo FK issues.
+-
+## Project Structure
+
+Two-level view of the repository (Tree -L 2):
+
+```
+.
+├── .vscode
+│   └── extensions.json
+├── dashboard
+│   ├── management
+│   ├── migrations
+│   ├── __init__.py
+│   ├── admin.py
+│   ├── ai_tools.py
+│   ├── apps.py
+│   ├── gemini.py
+│   ├── models.py
+│   ├── nlq.py
+│   ├── serializers.py
+│   ├── tests.py
+│   ├── timeutils.py
+│   ├── urls.py
+│   └── views.py
+├── guides
+│   ├── assets
+│   ├── .DS_Store
+│   ├── access.md
+│   ├── create.md
+│   ├── deliveries.csv
+│   ├── lories.csv
+│   ├── PIVOTAL_POINT.md
+│   ├── prompt.md
+│   └── status.md
+├── iswmc_dashboard
+│   ├── __init__.py
+│   ├── asgi.py
+│   ├── settings.py
+│   ├── urls.py
+│   └── wsgi.py
+├── templates
+│   ├── dashboard
+│   └── .DS_Store
+├── theme
+│   ├── migrations
+│   ├── static
+│   ├── static_src
+│   ├── .DS_Store
+│   ├── __init__.py
+│   ├── admin.py
+│   ├── apps.py
+│   ├── input.css
+│   ├── models.py
+│   ├── tests.py
+│   └── views.py
+├── .DS_Store
+├── .env
+├── .gitignore
+├── manage.py
+├── README.md
+└── requirements.txt
+```
+
+## Architecture Overview
+
+- Django project: `iswmc_dashboard`
+  - Routing in `iswmc_dashboard/urls.py` includes the `dashboard` app URLs.
+  - Settings in `iswmc_dashboard/settings.py` (Tailwind, DRF, static roots, humanize, DB via Djongo).
+- App: `dashboard`
+  - Models map to existing Mongo collections (`deliveries`, `lorries`). Joins are in Python using `lorry_id`.
+  - Views render the main dashboard and an HTMX partial (`/aggregated-table/`) for period changes.
+  - Time/aggregation utilities live in `dashboard/timeutils.py` (trial window, NOW, parsers, grouping).
+  - REST API via DRF: `/api/lorries/`, `/api/transactions/`, `/api/aggregated/`.
+  - AI integration:
+    - `nlq.py` — rule‑based natural language queries routed to tools.
+    - `ai_tools.py` — shared tools (list/describe collections, totals, by‑period, by‑type).
+    - `gemini.py` — entrypoint: tries Vertex AI Gemini with function‑calling if configured, otherwise local NLQ.
+- Templates
+  - `templates/dashboard/index.html` — main page, KPI cards, period selector, global chart rendering, side cards alignment script.
+  - `templates/dashboard/_aggregated_table.html` — three charts (by period, composition, by type) + AI assistant block + transaction table.
+- Styling
+  - Tailwind via `theme` app; compiled CSS in `theme/static/css/styles.css`.
+- Static assets
+  - Logos served from `guides/assets` (configured in `STATICFILES_DIRS`). Alternative path `static/img/` also supported.
+- Behavior
+  - Trial window fixed to Jan 2025; NOW fixed to 2025‑01‑25 16:00 UTC.
+  - HTMX pushes the root URL with `?period=...`; direct hits to the partial redirect back to the full page.
+  - Charts re-render on HTMX swaps; numbers use thousands separators.

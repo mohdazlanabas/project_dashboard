@@ -1,0 +1,12 @@
+django==3.2.25
+djongo==1.3.6
+pytz
+sqlparse
+djangorestframework
+pymongo==3.12.3
+python-dotenv
+gunicorn
+
+# For GCP and Vertex AI
+google-cloud-aiplatform
+django-tailwind

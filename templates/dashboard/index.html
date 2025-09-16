@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html>
+<head>
+    {% load static humanize %}
+    <title>Dashboard</title>
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="/static/css/styles.css" rel="stylesheet">
+</head>
+<body class="bg-gray-50 min-h-screen p-6">
+    <!-- Fixed Date & Time card at top-right of page -->
+    <div class="fixed top-4 right-6 z-10 bg-white/90 backdrop-blur rounded-lg border p-3 shadow">
+        <div class="text-xs text-gray-600">Date & Time</div>
+        <div class="text-base font-semibold">{{ now|date:"j M Y, g:i A" }} UTC</div>
+    </div>
+
+    <!-- Logos card (vertical) below the date/time card -->
+    <div class="fixed right-6 z-10 bg-white/90 backdrop-blur rounded-lg border p-3 shadow mt-2" style="top: 88px; width: 160px; display: flex; flex-direction: column; align-items: center; gap: 12px;">
+        <div style="display:flex; flex-direction:column; align-items:center;">
+            <img
+                    src="{% static 'mbsp.png' %}"
+                    alt="MBSP Logo"
+                    class="h-12 w-auto object-contain block"
+                    onerror="this.onerror=null;this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'160\' height=\'80\'><rect width=\'100%\' height=\'100%\' fill=\'%23f3f4f6\'/><text x=\'50%\' y=\'50%\' dominant-baseline=\'middle\' text-anchor=\'middle\' font-family=\'Arial\' font-size=\'22\' fill=\'%23374151\'>MBSP</text></svg>'"/>
+            <div class="text-xs text-gray-600 mt-1">Client</div>
+        </div>
+        <div class="h-px w-full bg-gray-200"></div>
+        <div style="display:flex; flex-direction:column; align-items:center;">
+            <img
+                    src="{% static 'gssb.png' %}"
+                    alt="GSSB Logo"
+                    class="h-12 w-auto object-contain block"
+                    onerror="this.onerror=null;this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'160\' height=\'80\'><rect width=\'100%\' height=\'100%\' fill=\'%23f3f4f6\'/><text x=\'50%\' y=\'50%\' dominant-baseline=\'middle\' text-anchor=\'middle\' font-family=\'Arial\' font-size=\'22\' fill=\'%23374151\'>GSSB</text></svg>'"/>
+            <div class="text-xs text-gray-600 mt-1">Operator</div>
+        </div>
+    </div>
+
+    <div class="max-w-4xl mx-auto bg-white rounded-lg shadow p-6">
+        <div class="mb-4">
+            <h1 class="text-2xl font-bold">ISWMC Dashboard</h1>
+        </div>
+
+        <!-- Summary KPI cards -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+            <div class="rounded-lg border p-4 bg-gray-50">
+                <div class="text-sm text-gray-600">Total Monthly Deliveries</div>
+                <div class="text-2xl font-semibold">{{ kpi_total_deliveries|intcomma }}</div>
+            </div>
+            <div class="rounded-lg border p-4 bg-gray-50">
+                <div class="text-sm text-gray-600">Total Monthly Weight (Kg)</div>
+                <div class="text-2xl font-semibold">{{ kpi_total_weight_kg|floatformat:0|intcomma }}</div>
+            </div>
+            <div class="rounded-lg border p-4 bg-gray-50">
+                <div class="text-sm text-gray-600">Total Monthly Weight (Tons)</div>
+                <div class="text-2xl font-semibold">{{ kpi_total_weight_tons|floatformat:2|intcomma }}</div>
+            </div>
+            <div class="rounded-lg border p-4 bg-gray-50">
+                <div class="text-sm text-gray-600">Unique Lorries</div>
+                <div class="text-2xl font-semibold">{{ kpi_unique_lorries|intcomma }}</div>
+            </div>
+        </div>
+
+        <form class="mb-4">
+            <label class="font-semibold mr-2">Aggregation period:</label>
+            <select name="period"
+                    hx-get="{% url 'aggregated_table' %}"
+                    hx-target="#agg-table"
+                    hx-trigger="change"
+                    hx-indicator="#agg-loading"
+                    hx-vals="{}"
+                    class="border rounded px-2 py-1">
+                <option value="hourly" {% if period == 'hourly' %}selected{% endif %}>Hourly</option>
+                <option value="daily" {% if period == 'daily' %}selected{% endif %}>Daily</option>
+                <option value="weekly" {% if period == 'weekly' %}selected{% endif %}>Weekly</option>
+                <option value="monthly" {% if period == 'monthly' %}selected{% endif %}>Monthly</option>
+            </select>
+            <span id="agg-loading" class="htmx-indicator ml-3 text-sm text-gray-500">Loading…</span>
+        </form>
+
+        <div id="agg-table">
+            {% include 'dashboard/_aggregated_table.html' %}
+        </div>
+
+        <h2 class="text-lg font-semibold mt-8 mb-2">Latest Transactions</h2>
+        <div class="overflow-x-auto">
+            <table class="min-w-full border border-gray-200 rounded-lg overflow-hidden">
+                <thead class="bg-gray-100">
+                    <tr>
+                        <th class="px-4 py-2 text-left">Time</th>
+                        <th class="px-4 py-2 text-left">Lorry ID</th>
+                        <th class="px-4 py-2 text-left">Type</th>
+                        <th class="px-4 py-2 text-left">Weight</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for transaction in transactions %}
+                        <tr class="border-t">
+                            <td class="px-4 py-2 font-mono">{{ transaction.delivery_time }}</td>
+                            <td class="px-4 py-2 font-mono">{{ transaction.lorry_id }}</td>
+                            <td class="px-4 py-2">{{ transaction.lorry_types_id }}</td>
+                            <td class="px-4 py-2">{{ transaction.weight }}</td>
+                        </tr>
+                    {% empty %}
+                        <tr><td colspan="4" class="px-4 py-2 text-center">No transactions found.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <div class="mt-8">
+            <h2 class="text-lg font-semibold mb-2">Ask the AI Assistant</h2>
+            <form id="chat-form" hx-post="{% url 'dashboard_chat' %}" hx-target="#chat-response" hx-swap="innerHTML" class="flex gap-2 mb-2">
+                <input type="text" name="question" placeholder="Ask a question about the data..." required class="flex-1 border rounded px-2 py-1" />
+                <button type="submit" class="bg-blue-600 text-white px-4 py-1 rounded">Ask</button>
+            </form>
+            <div id="chat-response" class="bg-gray-100 rounded p-3 min-h-[2em]"></div>
+        </div>
+    </div>
+    <footer class="max-w-4xl mx-auto mt-4 text-center text-sm text-gray-500">
+        Developed by Net1io.com
+    </footer>
+</body>
+<script>
+    function renderAggChart() {
+        const dataEl = document.getElementById('agg-data');
+        if (!dataEl) return;
+        let rows;
+        try {
+            rows = JSON.parse(dataEl.textContent);
+        } catch (e) {
+            return;
+        }
+        // Chart 1: Group by period to show totals per period
+        const byPeriod = {};
+        rows.forEach(row => {
+            const key = row.period || 'Unknown';
+            if (!byPeriod[key]) byPeriod[key] = 0;
+            byPeriod[key] += Number(row.total_weight) || 0;
+        });
+        const periodLabels = Object.keys(byPeriod);
+        const periodValues = Object.values(byPeriod);
+        const periodCanvas = document.getElementById('aggChart');
+        if (periodCanvas) {
+            const ctx = periodCanvas.getContext('2d');
+            if (window.aggChartInstance) window.aggChartInstance.destroy();
+            window.aggChartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: periodLabels,
+                    datasets: [{
+                        label: 'Total Weight',
+                        data: periodValues,
+                        backgroundColor: 'rgba(59, 130, 246, 0.6)',
+                        borderColor: 'rgba(59, 130, 246, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    try { return Number(value).toLocaleString(); } catch(e) { return value; }
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Chart 2: Group by lorry type across the current window
+        const byType = {};
+        rows.forEach(row => {
+            const key = row.lorry_type || 'Unknown';
+            if (!byType[key]) byType[key] = 0;
+            byType[key] += Number(row.total_weight) || 0;
+        });
+        const typeLabels = Object.keys(byType);
+        const typeValues = Object.values(byType);
+        const typeCanvas = document.getElementById('typeChart');
+        if (typeCanvas) {
+            const tctx = typeCanvas.getContext('2d');
+            if (window.typeChartInstance) window.typeChartInstance.destroy();
+            window.typeChartInstance = new Chart(tctx, {
+                type: 'bar',
+                data: {
+                    labels: typeLabels,
+                    datasets: [{
+                        label: 'Total Weight',
+                        data: typeValues,
+                        backgroundColor: 'rgba(16, 185, 129, 0.6)',
+                        borderColor: 'rgba(16, 185, 129, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    try { return Number(value).toLocaleString(); } catch(e) { return value; }
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Chart 3: Composition (derived from total weight)
+        const totalWeight = rows.reduce((acc, r) => acc + (Number(r.total_weight) || 0), 0);
+        const compCanvas = document.getElementById('compChart');
+        if (compCanvas) {
+            const cctx = compCanvas.getContext('2d');
+            if (window.compChartInstance) window.compChartInstance.destroy();
+            const compLabels = ['Leachate (9%)', 'Recyclecables (11%)', 'Organic (45%)', 'Inorganic (20%)', 'Others (15%)'];
+            const compPerc = [0.09, 0.11, 0.45, 0.20, 0.15];
+            const compValues = compPerc.map(p => Math.round(p * totalWeight));
+            window.compChartInstance = new Chart(cctx, {
+                type: 'doughnut',
+                data: {
+                    labels: compLabels,
+                    datasets: [{
+                        data: compValues,
+                        backgroundColor: [
+                            'rgba(59, 130, 246, 0.7)',   // blue
+                            'rgba(234, 179, 8, 0.7)',    // amber
+                            'rgba(16, 185, 129, 0.7)',   // emerald
+                            'rgba(107, 114, 128, 0.7)',  // gray
+                            'rgba(99, 102, 241, 0.7)'    // indigo
+                        ],
+                        borderColor: [
+                            'rgba(59, 130, 246, 1)',
+                            'rgba(234, 179, 8, 1)',
+                            'rgba(16, 185, 129, 1)',
+                            'rgba(107, 114, 128, 1)',
+                            'rgba(99, 102, 241, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '65%',
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                generateLabels: function(chart) {
+                                    const data = chart.data;
+                                    if (!data.labels || !data.datasets.length) return [];
+                                    const ds = data.datasets[0];
+                                    const total = ds.data.reduce((a, b) => a + b, 0) || 1;
+                                    return data.labels.map((label, i) => ({
+                                        text: `${label}: ${(ds.data[i]||0).toLocaleString()}`,
+                                        fillStyle: ds.backgroundColor[i],
+                                        strokeStyle: ds.borderColor[i],
+                                        lineWidth: 1,
+                                        hidden: false,
+                                        index: i
+                                    }));
+                                }
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(ctx) {
+                                    const val = ctx.parsed || 0;
+                                    const pct = compPerc[ctx.dataIndex] * 100;
+                                    return `${ctx.label}: ${val.toLocaleString()} (${pct}%)`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+    }
+    document.addEventListener('DOMContentLoaded', renderAggChart);
+    document.body.addEventListener('htmx:afterSwap', function (e) {
+        var tgt = (e.detail && e.detail.target) ? e.detail.target : e.target;
+        if (tgt && tgt.id === 'agg-table') renderAggChart();
+    });
+    document.body.addEventListener('htmx:afterSettle', function (e) {
+        var tgt = (e.detail && e.detail.target) ? e.detail.target : e.target;
+        if (tgt && tgt.id === 'agg-table') renderAggChart();
+    });
+    </script>
+</html>

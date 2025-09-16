@@ -1,0 +1,48 @@
+{% load humanize %}
+<h3 class="text-sm font-semibold text-gray-600 tracking-wide mb-2">CHART VIEW</h3>
+<h2 class="text-xl font-bold mb-2">Aggregated Waste by Weight ({{ period|title }})</h2>
+<div class="mb-6">
+    <canvas id="aggChart" height="80"></canvas>
+    <!-- Aggregated data as JSON for Chart rendering (handled in index.html) -->
+    <script id="agg-data" type="application/json">[
+        {% for row in aggregated %}
+            {"period": "{{ row.period_display }}", "lorry_type": "{{ row.lorry__lorry_type }}", "total_weight": {{ row.total_weight|floatformat:'2' }} }{% if not forloop.last %},{% endif %}
+        {% endfor %}
+    ]</script>
+</div>
+
+<h2 class="text-xl font-bold mb-2">Aggregated Waste by By Composition ({{ period|title }})</h2>
+<div class="mb-6">
+    <canvas id="compChart" height="60" style="height: 160px; max-height: 160px;"></canvas>
+    <!-- Composition is derived from total weight in #agg-data -->
+</div>
+
+<h2 class="text-xl font-bold mb-2">Aggregated Waste by Lorry Type ({{ period|title }})</h2>
+<div class="mb-6">
+    <canvas id="typeChart" height="80"></canvas>
+    <!-- Uses the same #agg-data JSON; second chart renders from it -->
+    
+</div>
+<h3 class="text-sm font-semibold text-gray-600 tracking-wide mb-2">TRANSACTION VIEW</h3>
+<table class="min-w-full border border-gray-200 rounded-lg overflow-hidden">
+    <thead class="bg-gray-100">
+        <tr>
+            <th class="px-4 py-2">Period</th>
+            <th class="px-4 py-2">Lorry Type</th>
+            <th class="px-4 py-2">Total Weight</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for row in aggregated %}
+            <tr class="border-t {{ row.band }} {{ row.group_border }}" style="{{ row.band_style }}">
+                <td class="px-4 py-2">{{ row.period_display }}</td>
+                <td class="px-4 py-2">{{ row.lorry__lorry_type }}</td>
+                <td class="px-4 py-2">{{ row.total_weight|floatformat:2|intcomma }}</td>
+            </tr>
+        {% empty %}
+            <tr><td colspan="3" class="px-4 py-2 text-center">No data found.</td></tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<!-- Chart rendering moved to index.html to run after HTMX swaps -->

@@ -1,4 +1,4 @@
-# PIVOTAL POINT 2 — Stable MVP + AI/NLQ + Layout polish
+# PIVOTAL POINT 3 — Stable MVP + AI/NLQ + Layout polish + Core migrations plan
 
 Date: 2025-09-16
 
@@ -15,6 +15,7 @@ This document records the current stable, working state of the ISWMC Dashboard s
 - KPIs (month-to-date): Total Deliveries, Total Weight (Kg/Tons), Unique Lorries; numbers use thousands separators.
 - Transaction table: alternates blue banding by period group, with a strong group top border.
 - Logos panel under Date & Time: MBSP (Client) above GSSB (Operator). Panels now align to the dashboard card instead of the viewport edge on narrower screens.
+- Admin UI removed from the project to avoid extra migrations and reduce surface area. Core apps (contenttypes, auth, sessions) remain.
 
 ## Key Code/Config
 
@@ -23,6 +24,7 @@ This document records the current stable, working state of the ISWMC Dashboard s
     - `DEBUG=True` (dev)
     - `django.contrib.humanize` enabled
     - `STATICFILES_DIRS = [ BASE_DIR/'static', BASE_DIR/'guides'/'assets' ]`
+    - Removed `'django.contrib.admin'` from `INSTALLED_APPS`.
 
 - Views & logic
   - `dashboard/views.py`
@@ -64,6 +66,15 @@ This document records the current stable, working state of the ISWMC Dashboard s
 - Dependencies (see `requirements.txt`):
   - `django==3.2.25`, `djongo==1.3.6`, `pymongo==3.12.3`, `djangorestframework`, `python-dotenv`, `django-tailwind`
 
+## Migrations Strategy (to clear warnings)
+
+- Apply core migrations only:
+  - `python manage.py migrate contenttypes`
+  - `python manage.py migrate auth`
+  - `python manage.py migrate sessions`
+- If collections already exist, add `--fake-initial` per app.
+- Admin can be re‑enabled later by restoring `'django.contrib.admin'` and the admin URL, then running `python manage.py migrate admin`.
+
 ## Known Benign Warnings
 
 - Favicon 404 in dev is expected.
@@ -84,14 +95,14 @@ git commit -m "Pivotal Point: stable MVP UI + charts + logos (2025-09-16)"
 2) Create a tag
 
 ```
-git tag pivotal-2-2025-09-16
+git tag pivotal-3-2025-09-16
 ```
 
 3) Restore later
 
 ```
-git checkout pivotal-2-2025-09-16
-# or enforce: git reset --hard pivotal-2-2025-09-16
+git checkout pivotal-3-2025-09-16
+# or enforce: git reset --hard pivotal-3-2025-09-16
 ```
 
 Without git (archive):
@@ -99,7 +110,7 @@ Without git (archive):
 - Create an archive (exclude `venv/` if desired):
 
 ```
-tar --exclude=venv -czf pivotal-2-2025-09-16.tgz .
+tar --exclude=venv -czf pivotal-3-2025-09-16.tgz .
 ```
 
 - To restore, unpack over the workspace and ensure `.env` and logos are present.

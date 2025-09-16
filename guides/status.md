@@ -110,3 +110,14 @@ The foundation is solid, and we are ready to build the interactive and AI-powere
 
 - Tag suggestion: `pivotal-2-2025-09-16`.
 - Refer to `guides/PIVOTAL_POINT.md` for the inventory and restore steps.
+
+## Phase 8: Admin removed, migrations plan finalized (2025-09-16)
+
+- Removed `'django.contrib.admin'` from `INSTALLED_APPS` and the admin route.
+- Migrations guidance documented: apply `contenttypes`, `auth`, `sessions` only; use `--fake-initial` if needed.
+- This clears the startup warning without changing app behavior.
+
+### Pivotal Point 3
+
+- Tag suggestion: `pivotal-3-2025-09-16`.
+- See `guides/PIVOTAL_POINT.md` for full details and restore steps.

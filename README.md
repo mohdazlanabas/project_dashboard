@@ -108,7 +108,15 @@ This project is an AI-powered dashboard for an Integrated Solid Waste Management
 
 - If no data appears, verify Atlas credentials in `.env` and confirm the database name matches Atlas exactly.
 - Timestamps are parsed and normalized to aware UTC datetimes; non-string values are handled.
-- Admin/auth migrations are unapplied by default; run `python manage.py migrate` if you need Django auth/admin.
+- Admin UI has been disabled to keep the footprint small and avoid extra migrations. If you need it later, re‑enable `django.contrib.admin` in `INSTALLED_APPS`, add the admin URL back, and run `python manage.py migrate admin`.
+
+### Migrations (clearing the startup warning)
+
+- With admin disabled, apply only the core apps:
+  - `python manage.py migrate contenttypes`
+  - `python manage.py migrate auth`
+  - `python manage.py migrate sessions`
+- If a collection already exists, use `--fake-initial` for that app.
 
 ### Developer Tips
 
